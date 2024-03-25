@@ -11,14 +11,14 @@ export type WebTextData = {
    modelSelector: modelSelector;
 };
 // @type for url & selector input
-type inputData = {
+export type inputData = {
    url: string;
    selector: string;
 };
 // @type form model selector
 export type modelSelector = 'gpt-3.5-turbo-0125' | 'gpt-4-0125-preview' | 'gpt-4-1106-preview' | 'gpt-4-32k-0613' | 'gpt-4';
 // @type for openAI request
-type openAIRequest = {
+export type openAIRequest = {
    messages: [
       {
          role: 'system';
@@ -29,7 +29,7 @@ type openAIRequest = {
    model: modelSelector;
 };
 // @type for openAI response
-type openAIResponse = {
+export type openAIResponse = {
    content: string | null;
    info: {
       created: Date;
@@ -67,11 +67,11 @@ export async function POST(req: Request) {
    const LinkedInData = await GetWebData({
       url: data.linkedIn,
       selector: data.linkedInSelector,
-   });
+   } as inputData);
    const websiteData = await GetWebData({
       url: data.website,
       selector: data.websiteSelector,
-   });
+   } as inputData);
    const openAIResponse = await OpenAICall(LinkedInData, websiteData, data.textInput, data.modelSelector);
    const apiResponse: APIResponse = {
       ...openAIResponse,
@@ -83,7 +83,7 @@ export async function POST(req: Request) {
    };
    return Response.json(apiResponse);
 }
-export async function GetWebData(dataSource: inputData) {
+async function GetWebData(dataSource: inputData): Promise<string[]> {
    // #Scraping function
    function ScrapingFunction(elements: Element[]) {
       const scrapedText = elements.map((el) => {
@@ -102,7 +102,7 @@ export async function GetWebData(dataSource: inputData) {
    await browser.close();
    return data;
 }
-export async function OpenAICall(LinkedInData: string[], websiteData: string[], userInput: string, model: modelSelector) {
+async function OpenAICall(LinkedInData: string[], websiteData: string[], userInput: string, model: modelSelector) {
    // #format input & scraped data for openAI API
    //?SYSTEM PROMPT FOR OPENAI API
    const systemPrompt: string =
